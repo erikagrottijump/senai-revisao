@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Questionário de Revisão · SENAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#FF8000;
+  --orange-light:#FFF3E5;
+  --blue-mid:#2563EB;
+  --blue-light:#EFF6FF;
+  --blue-border:#BFDBFE;
+  --red:#DC2626;
+  --red-light:#FEF2F2;
+  --green:#15803D;
+  --green-light:#F0FDF4;
+  --purple:#7C3AED;
+  --purple-light:#F5F3FF;
+  --text:#111827;
+  --text-mid:#4B5563;
+  --text-light:#9CA3AF;
+  --border:#E5E7EB;
+  --bg:#FFFFFF;
+  --bg-off:#F9FAFB;
+  --bg-section:#F3F4F6;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#F3F4F6;color:var(--text);font-size:13px;line-height:1.5;min-height:100vh}
+
+/* NAV */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:#1a1a1a;border-bottom:3px solid var(--orange);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:52px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.18);
+}
+.nav-title{font-size:13px;font-weight:600;color:#fff}
+.nav-progress{display:flex;align-items:center;gap:12px}
+.progress-text{font-size:11px;color:rgba(255,255,255,0.5);font-weight:500}
+.progress-bar{width:160px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--orange);border-radius:2px;transition:width .4s ease}
+.nav-score-pill{font-size:11px;font-weight:700;color:#1a1a1a;background:var(--orange);padding:4px 14px;border-radius:100px;display:none}
+.nav-score-pill.visible{display:block}
+
+/* DECK */
+.deck{padding-top:72px;padding-bottom:60px;max-width:720px;margin:0 auto;padding-left:16px;padding-right:16px}
+
+/* COVER */
+.cover{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.08);overflow:hidden;margin-bottom:20px}
+.cover-bar{height:5px;background:var(--orange)}
+.cover-body{padding:32px 36px}
+.cover-kicker{font-size:10px;font-weight:600;color:var(--orange);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.cover-title{font-size:26px;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:10px}
+.cover-sub{font-size:13px;color:var(--text-mid);line-height:1.6;margin-bottom:24px}
+.cover-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:24px}
+.cover-stat{padding:12px 14px;border-right:1px solid var(--border);text-align:center}
+.cover-stat:last-child{border-right:none}
+.cover-stat-val{font-size:22px;font-weight:700;color:var(--text);line-height:1;margin-bottom:2px}
+.cover-stat-lbl{font-size:10px;color:var(--text-light)}
+.name-row{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:16px}
+.field-wrap label{font-size:10px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:5px}
+.field-wrap input{width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:5px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
+.field-wrap input:focus{border-color:var(--orange)}
+.btn-start{width:100%;padding:12px;background:var(--orange);color:#fff;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:background .15s}
+.btn-start:hover{background:#e67300}
+
+/* SECTION LABEL */
+.section-label{font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em;margin:24px 0 10px;padding-left:4px}
+
+/* QUESTION CARD */
+.q-card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:10px;overflow:hidden;border-left:4px solid transparent;transition:box-shadow .2s}
+.q-card.mc{border-left-color:var(--blue-mid)}
+.q-card.vf{border-left-color:var(--purple)}
+.q-card.open{border-left-color:var(--orange)}
+.q-card.correct{border-left-color:var(--green)!important;box-shadow:0 0 0 1.5px var(--green),0 2px 8px rgba(21,128,61,0.08)}
+.q-card.wrong{border-left-color:var(--red)!important;box-shadow:0 0 0 1.5px var(--red),0 2px 8px rgba(220,38,38,0.08)}
+.q-card.open-done{border-left-color:var(--orange)!important;box-shadow:0 0 0 1.5px var(--orange),0 2px 8px rgba(255,128,0,0.08)}
+
+.q-header{padding:16px 18px 10px;display:flex;gap:10px;align-items:flex-start}
+.q-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;color:#fff}
+.q-num.mc{background:var(--blue-mid)}
+.q-num.vf{background:var(--purple)}
+.q-num.open{background:var(--orange)}
+.q-type-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:3px;flex-shrink:0;margin-top:4px}
+.q-type-badge.mc{background:var(--blue-light);color:var(--blue-mid)}
+.q-type-badge.vf{background:var(--purple-light);color:var(--purple)}
+.q-type-badge.open{background:var(--orange-light);color:var(--orange)}
+.q-text-wrap{flex:1}
+.q-text{font-size:13px;font-weight:600;color:var(--text);line-height:1.5}
+.q-pts{font-size:10px;color:var(--text-light);font-weight:600;flex-shrink:0;margin-top:4px}
+
+.q-body{padding:0 18px 16px 54px}
+
+/* OPTIONS */
+.options{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;gap:10px;align-items:center;padding:9px 14px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg-off);cursor:pointer;transition:all .15s;user-select:none}
+.opt:hover{border-color:var(--blue-mid);background:var(--blue-light)}
+.opt.selected{border-color:var(--blue-mid);background:var(--blue-light)}
+.opt.opt-correct{border-color:var(--green)!important;background:var(--green-light)!important;cursor:default}
+.opt.opt-wrong{border-color:var(--red)!important;background:var(--red-light)!important;cursor:default}
+.opt.opt-reveal{border-color:var(--green)!important;background:var(--green-light)!important;cursor:default}
+.opt.opt-disabled{cursor:default;opacity:.7}
+.opt-letter{width:22px;height:22px;border-radius:4px;border:1.5px solid var(--border-mid);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text-mid);flex-shrink:0;background:#fff;transition:all .15s}
+.opt.selected .opt-letter{background:var(--blue-mid);border-color:var(--blue-mid);color:#fff}
+.opt.opt-correct .opt-letter{background:var(--green);border-color:var(--green);color:#fff}
+.opt.opt-wrong .opt-letter{background:var(--red);border-color:var(--red);color:#fff}
+.opt.opt-reveal .opt-letter{background:var(--green);border-color:var(--green);color:#fff}
+.opt-text{font-size:12px;color:var(--text-mid);line-height:1.4;flex:1}
+.opt-icon{font-size:14px;margin-left:auto;flex-shrink:0}
+
+/* VF */
+.vf-opts{display:flex;gap:10px}
+.vf-btn{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg-off);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--text-mid);cursor:pointer;transition:all .15s;text-align:center}
+.vf-btn:hover{border-color:var(--purple);background:var(--purple-light);color:var(--purple)}
+.vf-btn.selected{border-color:var(--purple);background:var(--purple-light);color:var(--purple)}
+.vf-btn.vf-correct{border-color:var(--green)!important;background:var(--green-light)!important;color:var(--green)!important;cursor:default}
+.vf-btn.vf-wrong{border-color:var(--red)!important;background:var(--red-light)!important;color:var(--red)!important;cursor:default}
+.vf-btn.vf-reveal{border-color:var(--green)!important;background:var(--green-light)!important;color:var(--green)!important;cursor:default}
+.vf-btn.vf-disabled{cursor:default}
+
+/* OPEN */
+.open-textarea{width:100%;min-height:90px;padding:10px 13px;border:1.5px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;color:var(--text);line-height:1.6;resize:vertical;outline:none;transition:border-color .15s;background:var(--bg-off)}
+.open-textarea:focus{border-color:var(--orange);background:#fff}
+.open-textarea:disabled{background:var(--bg-section);cursor:default}
+.open-hint{font-size:10px;color:var(--text-light);margin-top:5px}
+
+/* FEEDBACK */
+.q-feedback{margin-top:10px;padding:10px 13px;border-radius:5px;font-size:11px;line-height:1.5;display:none}
+.q-feedback.show{display:block}
+.q-feedback.fb-correct{background:var(--green-light);border:1px solid #BBF7D0;color:var(--green)}
+.q-feedback.fb-wrong{background:var(--red-light);border:1px solid #FECACA;color:var(--red)}
+.q-feedback.fb-open{background:var(--orange-light);border:1px solid #FFD0A0;color:#92400E}
+.fb-title{font-weight:700;margin-bottom:3px}
+
+/* UNANSWERED warning */
+.q-card.unanswered{box-shadow:0 0 0 2px var(--orange),0 2px 8px rgba(255,128,0,0.1)!important}
+
+/* SUBMIT AREA */
+.submit-area{margin-top:28px;text-align:center}
+.unanswered-msg{font-size:12px;color:var(--red);margin-bottom:12px;display:none}
+.btn-submit{padding:13px 40px;background:#1a1a1a;color:#fff;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:all .2s}
+.btn-submit:hover{background:#333}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+
+/* RESULTS */
+.results-card{background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.1);overflow:hidden;margin-top:28px;display:none}
+.results-card.show{display:block}
+.results-bar{height:5px;background:var(--orange)}
+.results-body{padding:28px 32px}
+.results-kicker{font-size:10px;font-weight:600;color:var(--orange);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.results-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px}
+.results-name{font-size:13px;color:var(--text-mid);margin-bottom:24px}
+.score-ring-wrap{display:flex;align-items:center;gap:28px;margin-bottom:24px}
+.score-ring{position:relative;width:110px;height:110px;flex-shrink:0}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring-bg{fill:none;stroke:var(--bg-section);stroke-width:8}
+.score-ring-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s ease}
+.score-ring-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.score-pct{font-size:22px;font-weight:700;color:var(--text);line-height:1}
+.score-label{font-size:10px;color:var(--text-light);margin-top:2px}
+.score-detail{flex:1}
+.score-detail-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px}
+.score-detail-row:last-child{border-bottom:none}
+.score-detail-label{color:var(--text-mid)}
+.score-detail-val{font-weight:700;color:var(--text)}
+.result-grade{display:inline-block;padding:6px 20px;border-radius:100px;font-size:12px;font-weight:700;letter-spacing:.03em;margin-top:16px}
+.grade-a{background:var(--green-light);color:var(--green);border:1px solid #BBF7D0}
+.grade-b{background:var(--blue-light);color:var(--blue-mid);border:1px solid var(--blue-border)}
+.grade-c{background:var(--orange-light);color:var(--orange);border:1px solid #FFD0A0}
+.grade-d{background:var(--red-light);color:var(--red);border:1px solid #FECACA}
+.results-msg{font-size:13px;color:var(--text-mid);line-height:1.6;margin-top:10px}
+.btn-review{margin-top:16px;padding:10px 24px;background:var(--bg-section);color:var(--text-mid);border:1px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer}
+.btn-review:hover{background:var(--border)}
+
+/* HIDDEN */
+.quiz-content{display:none}
+.quiz-content.show{display:block}
+
+/* ANIMATIONS */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.q-card{animation:fadeIn .3s ease both}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-title">Questionário de Revisão · SENAI</div>
+  <div class="nav-progress">
+    <span class="progress-text" id="progressText">0 / 16</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="nav-score-pill" id="navScore"></div>
+  </div>
+</nav>
+
+<div class="deck">
+
+  <!-- COVER / START -->
+  <div class="cover" id="coverCard">
+    <div class="cover-bar"></div>
+    <div class="cover-body">
+      <div class="cover-kicker">Avaliação de Revisão · SENAI</div>
+      <div class="cover-title">Questionário:<br>Fundamentos de Dados &amp; Data Storytelling</div>
+      <p class="cover-sub">Questões sobre tipos de variáveis, métricas, distribuição, interpretação e princípios de Data Storytelling. Responda todas as questões e clique em <strong>Enviar</strong> para ver seu resultado.</p>
+      <div class="cover-stats">
+        <div class="cover-stat">
+          <div class="cover-stat-val">16</div>
+          <div class="cover-stat-lbl">questões</div>
+        </div>
+        <div class="cover-stat">
+          <div class="cover-stat-val">10</div>
+          <div class="cover-stat-lbl">múltipla escolha</div>
+        </div>
+        <div class="cover-stat">
+          <div class="cover-stat-val">6</div>
+          <div class="cover-stat-lbl">verdadeiro/falso</div>
+        </div>
+        <div class="cover-stat">
+          <div class="cover-stat-val" style="color:var(--orange)">82 pts</div>
+          <div class="cover-stat-lbl">pontuação máx.</div>
+        </div>
+      </div>
+      <div class="name-row">
+        <div class="field-wrap">
+          <label>Seu nome</label>
+          <input type="text" id="studentName" placeholder="Digite seu nome completo">
+        </div>
+        <div class="field-wrap">
+          <label>E-mail SENAI</label>
+          <input type="email" id="studentEmail" placeholder="nome@sp.senai.br">
+        </div>
+      </div>
+      <button class="btn-start" onclick="startQuiz()">Começar questionário →</button>
+    </div>
+  </div>
+
+  <!-- QUIZ CONTENT -->
+  <div class="quiz-content" id="quizContent">
+
+    <!-- BLOCO 1 -->
+    <div class="section-label">Bloco 1 · Fundamentos de Dados</div>
+
+    <!-- Q1 -->
+    <div class="q-card mc" id="qcard-1">
+      <div class="q-header">
+        <div class="q-num mc">1</div>
+        <div class="q-type-badge mc">Múltipla escolha</div>
+        <div class="q-text-wrap"><div class="q-text">Uma pesquisa registra o nível de satisfação com as opções: Insatisfeito, Neutro, Satisfeito e Muito Satisfeito. Que tipo de variável é essa?</div></div>
+        <div class="q-pts">5 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="options" id="opts-1">
+          <div class="opt" onclick="selectOpt(1,'A')"><div class="opt-letter" id="ltr-1-A">A</div><div class="opt-text">Quantitativa discreta</div></div>
+          <div class="opt" onclick="selectOpt(1,'B')"><div class="opt-letter" id="ltr-1-B">B</div><div class="opt-text">Qualitativa nominal</div></div>
+          <div class="opt" onclick="selectOpt(1,'C')"><div class="opt-letter" id="ltr-1-C">C</div><div class="opt-text">Qualitativa ordinal</div></div>
+          <div class="opt" onclick="selectOpt(1,'D')"><div class="opt-letter" id="ltr-1-D">D</div><div class="opt-text">Quantitativa contínua</div></div>
+        </div>
+        <div class="q-feedback" id="fb-1"></div>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="q-card mc" id="qcard-2">
+      <div class="q-header">
+        <div class="q-num mc">2</div>
+        <div class="q-type-badge mc">Múltipla escolha</div>
+        <div class="q-text-wrap"><div class="q-text">O número de faltas de um aluno em um mês é um exemplo de qual tipo de variável?</div></div>
+        <div class="q-pts">5 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="options" id="opts-2">
+          <div class="opt" onclick="selectOpt(2,'A')"><div class="opt-letter" id="ltr-2-A">A</div><div class="opt-text">Qualitativa ordinal</div></div>
+          <div class="opt" onclick="selectOpt(2,'B')"><div class="opt-letter" id="ltr-2-B">B</div><div class="opt-text">Quantitativa contínua</div></div>
+          <div class="opt" onclick="selectOpt(2,'C')"><div class="opt-letter" id="ltr-2-C">C</div><div class="opt-text">Quantitativa discreta</div></div>
+          <div class="opt" onclick="selectOpt(2,'D')"><div class="opt-letter" id="ltr-2-D">D</div><div class="opt-text">Qualitativa nominal</div></div>
+        </div>
+        <div class="q-feedback" id="fb-2"></div>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="q-card mc" id="qcard-3">
+      <div class="q-header">
+        <div class="q-num mc">3</div>
+        <div class="q-type-badge mc">Múltipla escolha</div>
+        <div class="q-text-wrap"><div class="q-text">A temperatura medida em graus Celsius é um exemplo de variável:</div></div>
+        <div class="q-pts">5 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="options" id="opts-3">
+          <div class="opt" onclick="selectOpt(3,'A')"><div class="opt-letter" id="ltr-3-A">A</div><div class="opt-text">Qualitativa nominal</div></div>
+          <div class="opt" onclick="selectOpt(3,'B')"><div class="opt-letter" id="ltr-3-B">B</div><div class="opt-text">Quantitativa discreta</div></div>
+          <div class="opt" onclick="selectOpt(3,'C')"><div class="opt-letter" id="ltr-3-C">C</div><div class="opt-text">Qualitativa ordinal</div></div>
+          <div class="opt" onclick="selectOpt(3,'D')"><div class="opt-letter" id="ltr-3-D">D</div><div class="opt-text">Quantitativa contínua</div></div>
+        </div>
+        <div class="q-feedback" id="fb-3"></div>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="q-card mc" id="qcard-4">
+      <div class="q-header">
+        <div class="q-num mc">4</div>
+        <div class="q-type-badge mc">Múltipla escolha</div>
+        <div class="q-text-wrap"><div class="q-text">Um analista calcula a média salarial e encontra R$ 8.500. Porém, um integrante ganha R$ 60.000 e os demais ganham em torno de R$ 3.000. Qual afirmação está correta?</div></div>
+        <div class="q-pts">5 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="options" id="opts-4">
+          <div class="opt" onclick="selectOpt(4,'A')"><div class="opt-letter" id="ltr-4-A">A</div><div class="opt-text">A média representa bem a realidade da equipe</div></div>
+          <div class="opt" onclick="selectOpt(4,'B')"><div class="opt-letter" id="ltr-4-B">B</div><div class="opt-text">A mediana seria uma métrica mais adequada nesse caso</div></div>
+          <div class="opt" onclick="selectOpt(4,'C')"><div class="opt-letter" id="ltr-4-C">C</div><div class="opt-text">A moda seria a métrica mais adequada nesse caso</div></div>
+          <div class="opt" onclick="selectOpt(4,'D')"><div class="opt-letter" id="ltr-4-D">D</div><div class="opt-text">O máximo seria a métrica mais adequada nesse caso</div></div>
+        </div>
+        <div class="q-feedback" id="fb-4"></div>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="q-card mc" id="qcard-5">
+      <div class="q-header">
+        <div class="q-num mc">5</div>
+        <div class="q-type-badge mc">Múltipla escolha</div>
+        <div class="q-text-wrap"><div class="q-text">Qual é a principal vantagem da mediana em relação à média?</div></div>
+        <div class="q-pts">5 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="options" id="opts-5">
+          <div class="opt" onclick="selectOpt(5,'A')"><div class="opt-letter" id="ltr-5-A">A</div><div class="opt-text">É sempre maior que a média</div></div>
+          <div class="opt" onclick="selectOpt(5,'B')"><div class="opt-letter" id="ltr-5-B">B</div><div class="opt-text">É mais fácil de calcular</div></div>
+          <div class="opt" onclick="selectOpt(5,'C')"><div class="opt-letter" id="ltr-5-C">C</div><div class="opt-text">Não é afetada por valores extremos (outliers)</div></div>
+          <div class="opt" onclick="selectOpt(5,'D')"><div class="opt-letter" id="ltr-5-D">D</div><div class="opt-text">Funciona melhor para variáveis qualitativas</div></div>
+        </div>
+        <div class="q-feedback" id="fb-5"></div>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="q-card mc" id="qcard-6">
+      <div class="q-header">
+        <div class="q-num mc">6</div>
+        <div class="q-type-badge mc">Múltipla escolha</div>
+        <div class="q-text-wrap"><div class="q-text">Turma A: notas 7, 7, 7, 7, 7. Turma B: notas 2, 5, 7, 9, 12. Ambas têm média 7. O que diferencia as turmas analiticamente?</div></div>
+        <div class="q-pts">5 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="options" id="opts-6">
+          <div class="opt" onclick="selectOpt(6,'A')"><div class="opt-letter" id="ltr-6-A">A</div><div class="opt-text">Nada — são estatisticamente idênticas</div></div>
+          <div class="opt" onclick="selectOpt(6,'B')"><div class="opt-letter" id="ltr-6-B">B</div><div class="opt-text">A Turma B tem maior variabilidade, indicando desempenho mais inconsistente</div></div>
+          <div class="opt" onclick="selectOpt(6,'C')"><div class="opt-letter" id="ltr-6-C">C</div><div class="opt-text">A Turma A é mais arriscada porque todos têm a mesma nota</div></div>
+          <div class="opt" onclick="selectOpt(6,'D')"><div class="opt-letter" id="ltr-6-D">D</div><div class="opt-text">Não é possível comparar turmas com a mesma média</div></div>
+        </div>
+        <div class="q-feedback" id="fb-6"></div>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="q-card mc" id="qcard-7">
+      <div class="q-header">
+        <div class="q-num mc">7</div>
+        <div class="q-type-badge mc">Múltipla escolha</div>
+        <div class="q-text-wrap"><div class="q-text">Um sistema registrou que um aluno teve 999 chamados. Os demais tiveram entre 0 e 5. Qual é a atitude correta?</div></div>
+        <div class="q-pts">5 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="options" id="opts-7">
+          <div class="opt" onclick="selectOpt(7,'A')"><div class="opt-letter" id="ltr-7-A">A</div><div class="opt-text">Incluir normalmente — dados extremos são sempre legítimos</div></div>
+          <div class="opt" onclick="selectOpt(7,'B')"><div class="opt-letter" id="ltr-7-B">B</div><div class="opt-text">Ignorar e não mencionar na análise</div></div>
+          <div class="opt" onclick="selectOpt(7,'C')"><div class="opt-letter" id="ltr-7-C">C</div><div class="opt-text">Investigar se é erro, documentar a decisão e tratar antes de calcular métricas</div></div>
+          <div class="opt" onclick="selectOpt(7,'D')"><div class="opt-letter" id="ltr-7-D">D</div><div class="opt-text">Substituir automaticamente pela média dos demais</div></div>
+        </div>
+        <div class="q-feedback" id="fb-7"></div>
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="q-card mc" id="qcard-8">
+      <div class="q-header">
+        <div class="q-num mc">8</div>
+        <div class="q-type-badge mc">Múltipla escolha</div>
+        <div class="q-text-wrap"><div class="q-text">Se a média e a mediana de um conjunto são muito diferentes entre si, isso provavelmente indica:</div></div>
+        <div class="q-pts">5 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="options" id="opts-8">
+          <div class="opt" onclick="selectOpt(8,'A')"><div class="opt-letter" id="ltr-8-A">A</div><div class="opt-text">Erro de cálculo</div></div>
+          <div class="opt" onclick="selectOpt(8,'B')"><div class="opt-letter" id="ltr-8-B">B</div><div class="opt-text">Que os dados têm distribuição simétrica</div></div>
+          <div class="opt" onclick="selectOpt(8,'C')"><div class="opt-letter" id="ltr-8-C">C</div><div class="opt-text">Presença de outliers ou distribuição assimétrica</div></div>
+          <div class="opt" onclick="selectOpt(8,'D')"><div class="opt-letter" id="ltr-8-D">D</div><div class="opt-text">Que a moda é igual à média</div></div>
+        </div>
+        <div class="q-feedback" id="fb-8"></div>
+      </div>
+    </div>
+
+    <!-- Q9 VF -->
+    <div class="q-card vf" id="qcard-9">
+      <div class="q-header">
+        <div class="q-num vf">9</div>
+        <div class="q-type-badge vf">Verdadeiro / Falso</div>
+        <div class="q-text-wrap"><div class="q-text">Variáveis qualitativas nominais possuem uma ordem natural entre suas categorias.</div></div>
+        <div class="q-pts">3 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="vf-opts">
+          <button class="vf-btn" id="vf-9-V" onclick="selectVF(9,'V')">Verdadeiro</button>
+          <button class="vf-btn" id="vf-9-F" onclick="selectVF(9,'F')">Falso</button>
+        </div>
+        <div class="q-feedback" id="fb-9"></div>
+      </div>
+    </div>
+
+    <!-- Q10 VF -->
+    <div class="q-card vf" id="qcard-10">
+      <div class="q-header">
+        <div class="q-num vf">10</div>
+        <div class="q-type-badge vf">Verdadeiro / Falso</div>
+        <div class="q-text-wrap"><div class="q-text">Dois conjuntos de dados com a mesma média podem ter distribuições completamente diferentes e levar a conclusões distintas.</div></div>
+        <div class="q-pts">3 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="vf-opts">
+          <button class="vf-btn" id="vf-10-V" onclick="selectVF(10,'V')">Verdadeiro</button>
+          <button class="vf-btn" id="vf-10-F" onclick="selectVF(10,'F')">Falso</button>
+        </div>
+        <div class="q-feedback" id="fb-10"></div>
+      </div>
+    </div>
+
+    <!-- Q11 VF -->
+    <div class="q-card vf" id="qcard-11">
+      <div class="q-header">
+        <div class="q-num vf">11</div>
+        <div class="q-type-badge vf">Verdadeiro / Falso</div>
+        <div class="q-text-wrap"><div class="q-text">Variável quantitativa contínua só pode assumir valores inteiros.</div></div>
+        <div class="q-pts">3 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="vf-opts">
+          <button class="vf-btn" id="vf-11-V" onclick="selectVF(11,'V')">Verdadeiro</button>
+          <button class="vf-btn" id="vf-11-F" onclick="selectVF(11,'F')">Falso</button>
+        </div>
+        <div class="q-feedback" id="fb-11"></div>
+      </div>
+    </div>
+
+    <!-- BLOCO 2 -->
+    <div class="section-label" style="margin-top:32px">Bloco 2 · Data Storytelling</div>
+
+    <!-- Q12 -->
+    <div class="q-card mc" id="qcard-12">
+      <div class="q-header">
+        <div class="q-num mc">12</div>
+        <div class="q-type-badge mc">Múltipla escolha</div>
+        <div class="q-text-wrap"><div class="q-text">Qual é a principal diferença entre análise exploratória e análise explanatória?</div></div>
+        <div class="q-pts">5 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="options" id="opts-12">
+          <div class="opt" onclick="selectOpt(12,'A')"><div class="opt-letter" id="ltr-12-A">A</div><div class="opt-text">A exploratória usa gráficos e a explanatória usa tabelas</div></div>
+          <div class="opt" onclick="selectOpt(12,'B')"><div class="opt-letter" id="ltr-12-B">B</div><div class="opt-text">A exploratória investiga dados; a explanatória comunica uma conclusão a uma audiência</div></div>
+          <div class="opt" onclick="selectOpt(12,'C')"><div class="opt-letter" id="ltr-12-C">C</div><div class="opt-text">A explanatória é sempre mais rápida de produzir</div></div>
+          <div class="opt" onclick="selectOpt(12,'D')"><div class="opt-letter" id="ltr-12-D">D</div><div class="opt-text">São sinônimos — têm o mesmo propósito</div></div>
+        </div>
+        <div class="q-feedback" id="fb-12"></div>
+      </div>
+    </div>
+
+    <!-- Q13 -->
+    <div class="q-card mc" id="qcard-13">
+      <div class="q-header">
+        <div class="q-num mc">13</div>
+        <div class="q-type-badge mc">Múltipla escolha</div>
+        <div class="q-text-wrap"><div class="q-text">Qual é a sequência correta de um storyboard de dados?</div></div>
+        <div class="q-pts">5 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="options" id="opts-13">
+          <div class="opt" onclick="selectOpt(13,'A')"><div class="opt-letter" id="ltr-13-A">A</div><div class="opt-text">Ação → Evidência → Contexto → Comparação → Conclusão</div></div>
+          <div class="opt" onclick="selectOpt(13,'B')"><div class="opt-letter" id="ltr-13-B">B</div><div class="opt-text">Conclusão → Contexto → Evidência → Comparação → Ação</div></div>
+          <div class="opt" onclick="selectOpt(13,'C')"><div class="opt-letter" id="ltr-13-C">C</div><div class="opt-text">Contexto → Evidência → Comparação → Conclusão → Ação</div></div>
+          <div class="opt" onclick="selectOpt(13,'D')"><div class="opt-letter" id="ltr-13-D">D</div><div class="opt-text">Evidência → Comparação → Ação → Contexto → Conclusão</div></div>
+        </div>
+        <div class="q-feedback" id="fb-13"></div>
+      </div>
+    </div>
+
+    <!-- Q14 -->
+    <div class="q-card mc" id="qcard-14">
+      <div class="q-header">
+        <div class="q-num mc">14</div>
+        <div class="q-type-badge mc">Múltipla escolha</div>
+        <div class="q-text-wrap"><div class="q-text">Um analista apresenta 12 gráficos sem título com insight e sem conclusão para gestores. O que está errado?</div></div>
+        <div class="q-pts">5 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="options" id="opts-14">
+          <div class="opt" onclick="selectOpt(14,'A')"><div class="opt-letter" id="ltr-14-A">A</div><div class="opt-text">Há gráficos demais — o ideal é usar apenas 1</div></div>
+          <div class="opt" onclick="selectOpt(14,'B')"><div class="opt-letter" id="ltr-14-B">B</div><div class="opt-text">A análise está em modo exploratório quando deveria ser explanatória — falta mensagem principal e recomendação</div></div>
+          <div class="opt" onclick="selectOpt(14,'C')"><div class="opt-letter" id="ltr-14-C">C</div><div class="opt-text">O problema é a falta de tabelas de dados brutos</div></div>
+          <div class="opt" onclick="selectOpt(14,'D')"><div class="opt-letter" id="ltr-14-D">D</div><div class="opt-text">Mais gráficos sempre significam mais qualidade</div></div>
+        </div>
+        <div class="q-feedback" id="fb-14"></div>
+      </div>
+    </div>
+
+    <!-- Q15 VF -->
+    <div class="q-card vf" id="qcard-15">
+      <div class="q-header">
+        <div class="q-num vf">15</div>
+        <div class="q-type-badge vf">Verdadeiro / Falso</div>
+        <div class="q-text-wrap"><div class="q-text">O título de um gráfico deve comunicar o insight (ex: "Vendas caíram 20% no noturno"), não apenas descrever o que foi plotado.</div></div>
+        <div class="q-pts">3 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="vf-opts">
+          <button class="vf-btn" id="vf-15-V" onclick="selectVF(15,'V')">Verdadeiro</button>
+          <button class="vf-btn" id="vf-15-F" onclick="selectVF(15,'F')">Falso</button>
+        </div>
+        <div class="q-feedback" id="fb-15"></div>
+      </div>
+    </div>
+
+    <!-- Q16 VF -->
+    <div class="q-card vf" id="qcard-16">
+      <div class="q-header">
+        <div class="q-num vf">16</div>
+        <div class="q-type-badge vf">Verdadeiro / Falso</div>
+        <div class="q-text-wrap"><div class="q-text">Para gestores, o mais importante é mostrar todo o processo exploratório para demonstrar o quanto o analista trabalhou.</div></div>
+        <div class="q-pts">3 pts</div>
+      </div>
+      <div class="q-body">
+        <div class="vf-opts">
+          <button class="vf-btn" id="vf-16-V" onclick="selectVF(16,'V')">Verdadeiro</button>
+          <button class="vf-btn" id="vf-16-F" onclick="selectVF(16,'F')">Falso</button>
+        </div>
+        <div class="q-feedback" id="fb-16"></div>
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-area">
+      <div class="unanswered-msg" id="unansweredMsg">⚠ Você deixou algumas questões sem resposta. As questões em destaque precisam ser respondidas.</div>
+      <button class="btn-submit" id="btnSubmit" onclick="submitQuiz()">Enviar e ver resultado →</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results-card" id="resultsCard">
+      <div class="results-bar"></div>
+      <div class="results-body">
+        <div class="results-kicker">Resultado</div>
+        <div class="results-title" id="resultsTitle">Parabéns!</div>
+        <div class="results-name" id="resultsName"></div>
+        <div class="score-ring-wrap">
+          <div class="score-ring">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle class="score-ring-bg" cx="55" cy="55" r="46"/>
+              <circle class="score-ring-fill" id="scoreRingFill" cx="55" cy="55" r="46" stroke-dasharray="289" stroke-dashoffset="289"/>
+            </svg>
+            <div class="score-ring-text">
+              <div class="score-pct" id="scorePct">0%</div>
+              <div class="score-label">acertos</div>
+            </div>
+          </div>
+          <div class="score-detail">
+            <div class="score-detail-row">
+              <span class="score-detail-label">Pontuação total</span>
+              <span class="score-detail-val" id="detailTotal">— / 82</span>
+            </div>
+            <div class="score-detail-row">
+              <span class="score-detail-label">Múltipla escolha</span>
+              <span class="score-detail-val" id="detailMC">— / 50</span>
+            </div>
+            <div class="score-detail-row">
+              <span class="score-detail-label">Verdadeiro / Falso</span>
+              <span class="score-detail-val" id="detailVF">— / 18</span>
+            </div>
+            <div class="score-detail-row">
+              <span class="score-detail-label">Questões respondidas</span>
+              <span class="score-detail-val" id="detailAnswered">—</span>
+            </div>
+          </div>
+        </div>
+        <div id="gradeLabel"></div>
+        <div class="results-msg" id="resultsMsg"></div>
+        <button class="btn-review" onclick="scrollToTop()">↑ Revisar respostas</button>
+      </div>
+    </div>
+
+  </div><!-- /quiz-content -->
+</div><!-- /deck -->
+
+<script>
+// GABARITO
+const answers = {
+  1:'C', 2:'C', 3:'D', 4:'B', 5:'C',
+  6:'B', 7:'C', 8:'C',
+  9:'F', 10:'V', 11:'F',
+  12:'B', 13:'C', 14:'B',
+  15:'V', 16:'F'
+};
+
+const feedbacks = {
+  1: {correct:'Correto! As categorias têm ordem hierárquica (Insatisfeito < Neutro < Satisfeito), mas o intervalo entre elas não é mensurável.', wrong:'Incorreto. A resposta correta é C — Qualitativa ordinal. Essas categorias têm ordem, mas sem intervalos mensuráveis entre elas.'},
+  2: {correct:'Correto! Faltas são contadas em inteiros (0, 1, 2…). Não faz sentido ter 2,5 faltas.', wrong:'Incorreto. A resposta correta é C — Quantitativa discreta. Valores inteiros e contáveis.'},
+  3: {correct:'Correto! Temperatura pode assumir qualquer valor real (36,7°C, 36,71°C…), sendo portanto contínua.', wrong:'Incorreto. A resposta correta é D — Quantitativa contínua. Temperatura admite frações.'},
+  4: {correct:'Correto! O salário de R$60k é um outlier que distorce a média. A mediana não é afetada por extremos e representa melhor a realidade.', wrong:'Incorreto. A resposta correta é B. O outlier de R$60k puxa a média para cima — a mediana seria mais representativa.'},
+  5: {correct:'Correto! A mediana é o valor central da distribuição ordenada e não muda com um único valor extremo.', wrong:'Incorreto. A resposta correta é C. A principal vantagem da mediana é ser robusta a outliers.'},
+  6: {correct:'Correto! Mesma média não significa mesma distribuição. A Turma B tem alunos em situação crítica (nota 2) e excelente (nota 12).', wrong:'Incorreto. A resposta correta é B. Mesma média pode esconder distribuições completamente diferentes.'},
+  7: {correct:'Correto! Um outlier tão extremo provavelmente é erro de sistema. A decisão de tratamento precisa ser documentada.', wrong:'Incorreto. A resposta correta é C. Outliers extremos precisam ser investigados e o tratamento documentado na análise.'},
+  8: {correct:'Correto! Em distribuições simétricas, média e mediana são próximas. Grande divergência indica assimetria ou outliers.', wrong:'Incorreto. A resposta correta é C. Divergência entre média e mediana sinaliza assimetria ou presença de outliers.'},
+  9: {correct:'Correto! Variáveis nominais NÃO têm ordem. Ex: cor dos olhos. Quem tem ordem são as variáveis ordinais.', wrong:'Incorreto. É FALSO. Variáveis nominais não possuem ordem. Ex: cores, cidades, gênero.'},
+  10: {correct:'Correto! Esse é o conceito central de variabilidade — mesma média pode esconder realidades muito diferentes.', wrong:'Incorreto. É VERDADEIRO. Turma A (7,7,7,7,7) e Turma B (2,5,7,9,12) têm a mesma média, mas distribuições opostas.'},
+  11: {correct:'Correto! É FALSO. Variável contínua pode assumir qualquer valor real, incluindo frações (ex: 36,7°C, 1,73m).', wrong:'Incorreto. É FALSO. Variável contínua admite frações e qualquer valor dentro de um intervalo.'},
+  12: {correct:'Correto! Exploratória serve ao analista (descoberta). Explanatória serve à audiência (decisão).', wrong:'Incorreto. A resposta correta é B. As duas fases têm produtos e audiências completamente diferentes.'},
+  13: {correct:'Correto! Essa sequência garante que a audiência entenda o problema antes dos dados e chegue à ação com raciocínio construído.', wrong:'Incorreto. A resposta correta é C: Contexto → Evidência → Comparação → Conclusão → Ação.'},
+  14: {correct:'Correto! Muitos gráficos sem conclusão = modo exploratório aplicado onde deveria ser explanatório. Falta mensagem e recomendação.', wrong:'Incorreto. A resposta correta é B. O erro central é tratar a apresentação como exploratória quando a audiência precisa de conclusão e ação.'},
+  15: {correct:'Correto! O título deve comunicar o insight, não descrever o tipo de gráfico. "Noturno tem pior desempenho" orienta decisões.', wrong:'Incorreto. É VERDADEIRO. O título deve trazer o insight, não apenas descrever o conteúdo do gráfico.'},
+  16: {correct:'Correto! É FALSO. Gestores precisam de clareza e síntese, não do processo completo de exploração.', wrong:'Incorreto. É FALSO. Para gestores, o que importa é mensagem clara, evidência e recomendação — não o processo todo.'},
+};
+
+const points = {1:5,2:5,3:5,4:5,5:5,6:5,7:5,8:5,9:3,10:3,11:3,12:5,13:5,14:5,15:3,16:3};
+const mcQs = [1,2,3,4,5,6,7,8,12,13,14];
+const vfQs = [9,10,11,15,16];
+const totalMax = 82;
+
+let userAnswers = {};
+let submitted = false;
+
+function startQuiz() {
+  const name = document.getElementById('studentName').value.trim();
+  const email = document.getElementById('studentEmail').value.trim();
+  if (!name) {
+    document.getElementById('studentName').focus();
+    document.getElementById('studentName').style.borderColor = 'var(--red)';
+    return;
+  }
+  if (!email) {
+    document.getElementById('studentEmail').focus();
+    document.getElementById('studentEmail').style.borderColor = 'var(--red)';
+    return;
+  }
+  document.getElementById('coverCard').style.display = 'none';
+  document.getElementById('quizContent').classList.add('show');
+  updateProgress();
+}
+
+function selectOpt(qnum, letter) {
+  if (submitted) return;
+  const opts = document.querySelectorAll(`#opts-${qnum} .opt`);
+  opts.forEach(o => o.classList.remove('selected'));
+  const letters = ['A','B','C','D'];
+  opts[letters.indexOf(letter)].classList.add('selected');
+  userAnswers[qnum] = letter;
+  document.getElementById(`qcard-${qnum}`).classList.remove('unanswered');
+  updateProgress();
+}
+
+function selectVF(qnum, val) {
+  if (submitted) return;
+  document.getElementById(`vf-${qnum}-V`).classList.remove('selected');
+  document.getElementById(`vf-${qnum}-F`).classList.remove('selected');
+  document.getElementById(`vf-${qnum}-${val}`).classList.add('selected');
+  userAnswers[qnum] = val;
+  document.getElementById(`qcard-${qnum}`).classList.remove('unanswered');
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = 16;
+  const answered = Object.keys(userAnswers).length;
+  document.getElementById('progressText').textContent = `${answered} / ${total}`;
+  document.getElementById('progressFill').style.width = `${(answered/total)*100}%`;
+}
+
+function submitQuiz() {
+  // Check unanswered
+  const allQs = [...mcQs, ...vfQs];
+  let unanswered = [];
+  allQs.forEach(q => { if (!userAnswers[q]) unanswered.push(q); });
+
+  if (unanswered.length > 0) {
+    document.getElementById('unansweredMsg').style.display = 'block';
+    unanswered.forEach(q => {
+      document.getElementById(`qcard-${q}`).classList.add('unanswered');
+      document.getElementById(`qcard-${q}`).scrollIntoView({behavior:'smooth', block:'center'});
+    });
+    // scroll to first unanswered
+    document.getElementById(`qcard-${unanswered[0]}`).scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+
+  submitted = true;
+  document.getElementById('btnSubmit').disabled = true;
+  document.getElementById('unansweredMsg').style.display = 'none';
+
+  let totalScore = 0, mcScore = 0, vfScore = 0;
+
+  // Grade MC
+  mcQs.forEach(q => {
+    const correct = answers[q];
+    const given = userAnswers[q];
+    const opts = document.querySelectorAll(`#opts-${q} .opt`);
+    const letters = ['A','B','C','D'];
+    const isCorrect = given === correct;
+    if (isCorrect) { totalScore += points[q]; mcScore += points[q]; }
+
+    opts.forEach((opt, i) => {
+      opt.classList.remove('selected');
+      opt.onclick = null;
+      if (letters[i] === correct) opt.classList.add('opt-reveal');
+      else if (letters[i] === given && !isCorrect) opt.classList.add('opt-wrong');
+      else opt.classList.add('opt-disabled');
+    });
+
+    // feedback
+    const fb = document.getElementById(`fb-${q}`);
+    fb.classList.add('show');
+    if (isCorrect) {
+      fb.classList.add('fb-correct');
+      fb.innerHTML = `<div class="fb-title">✓ Correto!</div>${feedbacks[q].correct}`;
+      document.getElementById(`qcard-${q}`).classList.add('correct');
+    } else {
+      fb.classList.add('fb-wrong');
+      fb.innerHTML = `<div class="fb-title">✗ Incorreto</div>${feedbacks[q].wrong}`;
+      document.getElementById(`qcard-${q}`).classList.add('wrong');
+    }
+  });
+
+  // Grade VF
+  vfQs.forEach(q => {
+    const correct = answers[q];
+    const given = userAnswers[q];
+    const isCorrect = given === correct;
+    if (isCorrect) { totalScore += points[q]; vfScore += points[q]; }
+
+    ['V','F'].forEach(v => {
+      const btn = document.getElementById(`vf-${q}-${v}`);
+      btn.onclick = null;
+      btn.classList.remove('selected');
+      if (v === correct) btn.classList.add('vf-reveal');
+      else if (v === given && !isCorrect) btn.classList.add('vf-wrong');
+      else btn.classList.add('vf-disabled');
+    });
+
+    const fb = document.getElementById(`fb-${q}`);
+    fb.classList.add('show');
+    if (isCorrect) {
+      fb.classList.add('fb-correct');
+      fb.innerHTML = `<div class="fb-title">✓ Correto!</div>${feedbacks[q].correct}`;
+      document.getElementById(`qcard-${q}`).classList.add('correct');
+    } else {
+      fb.classList.add('fb-wrong');
+      fb.innerHTML = `<div class="fb-title">✗ Incorreto</div>${feedbacks[q].wrong}`;
+      document.getElementById(`qcard-${q}`).classList.add('wrong');
+    }
+  });
+
+  // Show results
+  const pct = Math.round((totalScore / totalMax) * 100);
+  const name = document.getElementById('studentName').value;
+  const email = document.getElementById('studentEmail').value;
+
+  document.getElementById('resultsName').textContent = name + (email ? ` · ${email}` : '');
+  document.getElementById('detailTotal').textContent = `${totalScore} / ${totalMax}`;
+  document.getElementById('detailMC').textContent = `${mcScore} / 50`;
+  document.getElementById('detailVF').textContent = `${vfScore} / 18`;
+  document.getElementById('detailAnswered').textContent = `16 / 16`;
+  document.getElementById('scorePct').textContent = `${pct}%`;
+
+  // Animate ring
+  const circumference = 289;
+  const offset = circumference - (pct / 100) * circumference;
+  const ring = document.getElementById('scoreRingFill');
+  let color = pct >= 85 ? '#15803D' : pct >= 70 ? '#2563EB' : pct >= 50 ? '#FF8000' : '#DC2626';
+  ring.style.stroke = color;
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
+
+  // Grade + message
+  let grade, gradeClass, title, msg;
+  if (pct >= 90) {
+    grade = '🏆 Excelente'; gradeClass = 'grade-a'; title = 'Excelente resultado!';
+    msg = 'Você dominou os conceitos da revisão. Continue com esse nível de atenção nas próximas aulas.';
+  } else if (pct >= 75) {
+    grade = '✓ Bom desempenho'; gradeClass = 'grade-b'; title = 'Bom trabalho!';
+    msg = 'Você tem boa base nos conceitos. Revise as questões que errou — os feedbacks indicam exatamente onde reforçar.';
+  } else if (pct >= 50) {
+    grade = '→ Em desenvolvimento'; gradeClass = 'grade-c'; title = 'Continue praticando!';
+    msg = 'Há pontos importantes para revisar. Leia os feedbacks de cada questão errada e retome o material de aula.';
+  } else {
+    grade = '↩ Revisar conteúdo'; gradeClass = 'grade-d'; title = 'Reforço necessário';
+    msg = 'Os conceitos fundamentais precisam de mais atenção. Revise o material antes da próxima aula.';
+  }
+
+  document.getElementById('resultsTitle').textContent = title;
+  document.getElementById('gradeLabel').innerHTML = `<span class="result-grade ${gradeClass}">${grade}</span>`;
+  document.getElementById('resultsMsg').textContent = msg;
+
+  const resultsCard = document.getElementById('resultsCard');
+  resultsCard.classList.add('show');
+
+  // Nav pill
+  const pill = document.getElementById('navScore');
+  pill.textContent = `${totalScore} / ${totalMax} pts`;
+  pill.classList.add('visible');
+
+  setTimeout(() => { resultsCard.scrollIntoView({behavior:'smooth', block:'start'}); }, 200);
+}
+
+function scrollToTop() {
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
